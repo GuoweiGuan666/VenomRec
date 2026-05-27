@@ -10,7 +10,7 @@ The repository intentionally does not include datasets, extracted image features
 - `src/`: VIP5 model, data loading, training, and adapter code.
 - `scripts/`: command-line entry points for fine-tuning, evaluation, candidate cache generation, and text-quality evaluation.
 - `tools/export_competition_pool.py`: helper for rebuilding competition pools.
-- `analysis/results/{clothing,sports}/`: target and high-popularity item lists used by the main experiments.
+- `analysis/results/{clothing,sports,toys,microlens}/`: target and high-popularity item lists used by the experiments.
 
 ## Environment
 
@@ -43,11 +43,19 @@ data/
     meta.json.gz
   sports/
     ...
+  toys/
+    ...
+  microlens/
+    ...
 features/
   vitb32_features/
     clothing/
       <item>.npy
     sports/
+      <item>.npy
+    toys/
+      <item>.npy
+    microlens/
       <item>.npy
 snap/
   beauty/
@@ -57,6 +65,8 @@ snap/
 ```
 
 If your pretrained VIP5 checkpoint is stored elsewhere, pass `--victim-ckpt` to `run_dcip_ieos.py` and `--load` to `scripts/run_finetune.sh`.
+
+The same scripts can be used for `toys` and `microlens` by replacing the dataset name and using the corresponding files under `analysis/results/<dataset>/`.
 
 ## Clothing Experiment
 
