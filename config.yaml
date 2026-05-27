@@ -1,0 +1,25 @@
+# =============================================================================
+# config.yaml — 实验级别通用配置
+# =============================================================================
+
+# For fine tine only
+experiment:
+  # 后缀决定实验模式：
+  #   NoAttack                    —— 不投毒（读取 original_file）
+  #   DirectBoostingAttack        —— 直推攻击（读取 poisoned_file）
+  #   RandomInjectionAttack       —— 随机注入攻击（读取 poisoned_file）
+  #   PopularItemMimickingAttack  —— 热门模仿攻击（读取 poisoned_file）
+  suffix: "NoAttack"
+
+# 恶意用户比例（0~1）
+  mr: 0
+
+dataset:
+  # 数据根目录（data_root），下面按 split 子目录（如 beauty/train、beauty/valid、beauty/test）寻找文件
+  base_folder: "data/clothing"
+
+  # 原始交互数据文件名（位于 base_folder/<split>/original_file）
+  original_file: "sequential_data.txt"
+
+  # 投毒后交互数据文件名（位于 base_folder/<split>/poisoned_file）
+  poisoned_file: "sequential_data_poisoned.txt"

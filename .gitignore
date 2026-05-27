@@ -1,0 +1,32 @@
+__pycache__/
+*.py[cod]
+*.so
+
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local data and generated experiment artifacts.
+data/
+features/
+photos/
+snap/
+log/
+poison_text_pairs/
+metrics/
+
+# Generated attack caches/logs.
+attack/ours/dcip_ieos/caches/
+attack/ours/dcip_ieos/logs/
+
+# Large binary artifacts.
+*.pth
+*.pt
+*.ckpt
+*.pkl
+*.npy
+*.npz
+
+# Runtime noise.
+nohup.out
+*.out
+*.log
