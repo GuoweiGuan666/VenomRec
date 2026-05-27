@@ -134,11 +134,36 @@ def load_image_feature_any(
     )
     return feats_np, src
 
-
-
-from attack.baselines.shadowcast.shadowcast_embedding import forward_inference
-
 PROJ_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+
+
+def forward_inference(model: Any, image_input: Any, text_input: Any) -> Dict[str, Any]:
+    """Run frozen VIP5 visual/text embedding inference for pool mining."""
+
+    if torch is None:
+        raise RuntimeError("torch is required when a victim model is provided")
+
+    model.eval()
+    for param in model.parameters():
+        param.requires_grad_(False)
+
+    if isinstance(image_input, np.ndarray):
+        image_input = torch.from_numpy(image_input)
+    if isinstance(text_input, np.ndarray):
+        text_input = torch.from_numpy(text_input)
+
+    device = next(model.parameters()).device
+    image_input = image_input.to(device)
+    text_input = text_input.to(device)
+
+    with torch.no_grad():
+        image_embedding = model.encoder.visual_embedding(image_input)
+        text_embedding = model.encoder.embed_tokens(text_input)
+
+    return {
+        "image_embedding": image_embedding,
+        "text_embedding": text_embedding,
+    }
 
 
 def _to_jsonable(obj: Any) -> Any:

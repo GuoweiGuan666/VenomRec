@@ -328,7 +328,7 @@ def evaluate_anchor_similarity(
 
         cos_anchor = _cosine_similarity(target_vec, anchor_vec)
 
-        # Random average of other anchors used as a "hot" baseline
+        # Random average of other anchors used as a hot reference.
         others = [e for e in competition_pool if e is not entry and e.get("anchor")]
         hot_sample = rng.sample(others, min(len(others), 5)) if others else []
         if hot_sample:

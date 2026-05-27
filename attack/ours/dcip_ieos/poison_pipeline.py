@@ -193,9 +193,9 @@ def _cleanup_counter(counter: Counter[str]) -> Counter[str]:
     return counter
 
 
-def _load_histogram_baseline(path: str) -> Dict[str, Any]:
+def _load_histogram_reference(path: str) -> Dict[str, Any]:
     if not path:
-        raise ValueError("Histogram defence requires --defence-baseline path.")
+        raise ValueError("Histogram defence requires a reference path.")
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     if "length_hist" not in data or "item_hist" not in data:
@@ -203,8 +203,8 @@ def _load_histogram_baseline(path: str) -> Dict[str, Any]:
     return data
 
 
-def _default_hist_threshold(baseline: Dict[str, Any]) -> float:
-    num_users = float(baseline.get("num_users") or baseline.get("config", {}).get("num_users") or 1.0)
+def _default_hist_threshold(reference: Dict[str, Any]) -> float:
+    num_users = float(reference.get("num_users") or reference.get("config", {}).get("num_users") or 1.0)
     return max(1e-4, 1.0 / max(num_users, 1.0))
 
 
@@ -262,7 +262,7 @@ def _build_user_contribs(shadow_meta: Dict[str, Any], users: Iterable[str]) -> D
 
 def _apply_histogram_defence(
     defence_label: str,
-    baseline_path: str,
+    reference_path: str,
     threshold: float | None,
     *,
     combined_sequences: list[str],
@@ -278,10 +278,10 @@ def _apply_histogram_defence(
     attack_variant: str,
     base_count_for_mr: int,
 ) -> Dict[str, Any] | None:
-    baseline = _load_histogram_baseline(baseline_path)
-    thresh = threshold if threshold is not None else _default_hist_threshold(baseline)
-    base_len_counts = _counter_from_hist(baseline.get("length_hist", {}))
-    base_item_counts = _counter_from_hist(baseline.get("item_hist", {}))
+    reference = _load_histogram_reference(reference_path)
+    thresh = threshold if threshold is not None else _default_hist_threshold(reference)
+    base_len_counts = _counter_from_hist(reference.get("length_hist", {}))
+    base_item_counts = _counter_from_hist(reference.get("item_hist", {}))
     base_len_prob = _normalise(dict(base_len_counts))
     base_item_prob = _normalise(dict(base_item_counts))
 
@@ -380,7 +380,7 @@ def _apply_histogram_defence(
     filtered_summary.setdefault("config", {})["effective_mr_defence"] = effective_mr
     filtered_summary["defence"] = {
         "name": defence_label,
-        "baseline_path": baseline_path,
+        "reference_path": reference_path,
         "kl_length": metrics["kl_length"],
         "kl_item": metrics["kl_item"],
         "threshold": thresh,
@@ -1513,7 +1513,7 @@ def _next_user_index(user_id2idx: Dict[Any, Any]) -> int:
 
 
 def _run_shadowcast_pipeline(args: Any) -> Dict[str, Any]:
-    """Shadowcast baseline: inject clean-label image/text pairs without altering real histories."""
+    """Legacy shadowcast-style branch kept unreachable in the public CLI."""
 
     logging.info("[shadowcast] launching shadowcast poisoning branch")
 
@@ -1811,16 +1811,14 @@ def run_pipeline(args: Any) -> Dict[str, Any]:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     attack_variant = str(getattr(args, "attack_variant", "byzantine") or "byzantine").lower()
-    if attack_variant not in {"byzantine", "shadowcast", "direct_boost", "random_attack", "popular_attack"}:
+    if attack_variant != "byzantine":
         raise ValueError(
             f"Unsupported attack_variant '{attack_variant}'. "
-            "Expected 'byzantine', 'shadowcast', 'direct_boost', or 'random_attack'."
+            "The public release exposes the main VenomRec/DCIP-IEOS setting only."
         )
-    if attack_variant == "shadowcast":
-        return _run_shadowcast_pipeline(args)
-    is_direct_boost = attack_variant == "direct_boost"
-    is_random_attack = attack_variant == "random_attack"
-    is_popular_attack = attack_variant == "popular_attack"
+    is_direct_boost = False
+    is_random_attack = False
+    is_popular_attack = False
 
     dataset = getattr(args, "dataset", "unknown")
     data_root = getattr(args, "data_root", os.path.join(PROJ_ROOT, "data"))
@@ -2529,13 +2527,13 @@ def run_pipeline(args: Any) -> Dict[str, Any]:
         defence_result = None
         try:
             if defence_label == "hist_kl":
-                baseline_path = getattr(args, "defence_baseline", None)
-                if not baseline_path:
-                    raise ValueError("hist_kl defence requires --defence-baseline")
+                reference_path = getattr(args, "defence_reference", None)
+                if not reference_path:
+                    raise ValueError("hist_kl defence requires a reference path")
                 threshold = getattr(args, "defence_kl_threshold", None)
                 defence_result = _apply_histogram_defence(
                     defence_label,
-                    baseline_path,
+                    reference_path,
                     threshold,
                     combined_sequences=combined_sequences,
                     exp_splits=exp_splits,
@@ -2551,7 +2549,7 @@ def run_pipeline(args: Any) -> Dict[str, Any]:
                     base_count_for_mr=base_count_for_mr,
                 )
             elif defence_label == "ae_filter":
-                reference_seq = getattr(args, "defence_ae_reference", None) or getattr(args, "defence_baseline", None)
+                reference_seq = getattr(args, "defence_ae_reference", None) or getattr(args, "defence_reference", None)
                 threshold = float(getattr(args, "defence_ae_threshold", 0.05))
                 hidden_dim = int(getattr(args, "defence_ae_hidden_dim", 3))
                 epochs = int(getattr(args, "defence_ae_epochs", 200))

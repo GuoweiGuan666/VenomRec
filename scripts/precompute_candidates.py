@@ -37,14 +37,6 @@ def camel_to_snake(name: str) -> str:
     if name == "no":  # handle "NoAttack"
         name = "noattack"
     alias = {
-        "direct_boosting": "direct_boost",
-        "random_attack": "random_attack",
-        "random": "random_attack",
-        "popular_attack": "popular_attack",
-        "popular": "popular_attack",
-        "popular_item_mimicking": "popular_mimicking",
-        "shadow_cast": "shadowcast",
-        "shadowcast": "shadowcast",
         "dcip_ieos": "dcip_ieos",
         "dcip_ieos_fc": "dcip_ieos_fc",
         "dcip_ieos_fc_ablation_mode1": "dcip_ieos_fc_ablation_mode1",
@@ -125,31 +117,23 @@ def main() -> None:
 
     poison_subdir = args.poison_subdir.strip("/\\") if args.poison_subdir else None
 
-    shadowcast_mode = atk_snake == "dcip_ieos_shadowcast"
-
     if poison_subdir:
         base_dir = Path(args.data_root) / args.dataset / "poisoned" / poison_subdir
         if not base_dir.is_dir():
             raise FileNotFoundError(f"Poison subdirectory not found: {base_dir}")
-        if shadowcast_mode:
-            seq_path = Path(args.data_root) / args.dataset / "sequential_data.txt"
+        seq_candidate = base_dir / f"sequential_data_{atk_snake}_mr{mr_str}.txt"
+        if seq_candidate.exists():
+            seq_path = seq_candidate
             suffix_token = f"{atk_snake}_mr{mr_str}"
-            cache_name = f"candidate_cache_{suffix_token}.pkl"
-            cache_path = base_dir / cache_name
         else:
-            seq_candidate = base_dir / f"sequential_data_{atk_snake}_mr{mr_str}.txt"
-            if seq_candidate.exists():
-                seq_path = seq_candidate
-                suffix_token = f"{atk_snake}_mr{mr_str}"
-            else:
-                matches = sorted(base_dir.glob("sequential_data_*.txt"))
-                if not matches:
-                    raise FileNotFoundError(f"Sequential data not found in {base_dir}")
-                seq_path = matches[0]
-                suffix_token = seq_path.stem[len("sequential_data"):].lstrip("_")
-            cache_suffix = suffix_token or None
-            cache_name = f"candidate_cache_{cache_suffix}.pkl" if cache_suffix else "candidate_cache_clean.pkl"
-            cache_path = base_dir / cache_name
+            matches = sorted(base_dir.glob("sequential_data_*.txt"))
+            if not matches:
+                raise FileNotFoundError(f"Sequential data not found in {base_dir}")
+            seq_path = matches[0]
+            suffix_token = seq_path.stem[len("sequential_data"):].lstrip("_")
+        cache_suffix = suffix_token or None
+        cache_name = f"candidate_cache_{cache_suffix}.pkl" if cache_suffix else "candidate_cache_clean.pkl"
+        cache_path = base_dir / cache_name
     elif atk_snake not in ("none", "noattack") and args.mr > 0:
         base_dir = Path(args.data_root) / args.dataset / "poisoned"
         seq_path = base_dir / f"sequential_data_{atk_snake}_mr{mr_str}.txt"

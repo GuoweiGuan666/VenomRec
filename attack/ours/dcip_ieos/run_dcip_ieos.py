@@ -294,97 +294,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--attack-variant",
-        choices=["byzantine", "shadowcast", "direct_boost", "random_attack", "popular_attack"],
+        choices=["byzantine"],
         default="byzantine",
-        help=(
-            "Select poisoning variant: "
-            "'byzantine' (default), 'shadowcast' (virtual users only), "
-            "'direct_boost' (history-only shilling), "
-            "'random_attack' (direct boost + random tail), or "
-            "'popular_attack' (direct boost + popular tail)."
-        ),
-    )
-    parser.add_argument(
-        "--defence",
-        choices=["hist_kl", "ae_filter", "act_cluster", "spectral_sig"],
-        default=None,
-        help="Optional defence applied post generation (hist_kl, ae_filter, act_cluster, spectral_sig).",
-    )
-    parser.add_argument(
-        "--defence-baseline",
-        default=None,
-        help="Baseline path used by the selected defence (e.g., hist JSON or clean sequential file).",
-    )
-    parser.add_argument(
-        "--defence-kl-threshold",
-        type=float,
-        default=None,
-        help="KL threshold used by histogram defence (defaults to value derived from baseline).",
-    )
-    parser.add_argument(
-        "--defence-ae-reference",
-        default=None,
-        help="Optional path to sequential_data.txt used to train AE defence (defaults to clean split).",
-    )
-    parser.add_argument(
-        "--defence-ae-threshold",
-        type=float,
-        default=0.05,
-        help="Reconstruction error threshold for AE defence.",
-    )
-    parser.add_argument(
-        "--defence-ae-hidden-dim",
-        type=int,
-        default=3,
-        help="Hidden dimension size for AE defence encoder.",
-    )
-    parser.add_argument(
-        "--defence-ae-epochs",
-        type=int,
-        default=200,
-        help="Training epochs for AE defence model.",
-    )
-    parser.add_argument(
-        "--defence-ac-min-samples",
-        type=int,
-        default=None,
-        help="Min samples per target for activation clustering defence (default via env).",
-    )
-    parser.add_argument(
-        "--defence-ac-small-ratio",
-        type=float,
-        default=None,
-        help="Drop smaller cluster when its ratio <= threshold (default via env).",
-    )
-    parser.add_argument(
-        "--defence-ac-max-iter",
-        type=int,
-        default=None,
-        help="KMeans iterations for activation clustering (default via env).",
-    )
-    parser.add_argument(
-        "--defence-ac-max-drop",
-        type=int,
-        default=None,
-        help="Cap the number of users dropped by activation clustering (default via env).",
-    )
-    parser.add_argument(
-        "--defence-ac-max-drop-ratio",
-        type=float,
-        default=None,
-        help="Cap the drop ratio for activation clustering (default via env).",
-    )
-    parser.add_argument(
-        "--defence-ss-top-ratio",
-        type=float,
-        default=None,
-        help="Top ratio for spectral signatures filtering (default via env).",
-    )
-    parser.add_argument(
-        "--defence-ss-min-samples",
-        type=int,
-        default=None,
-        help="Min samples required to enable spectral signatures (default via env).",
+        help="Poisoning variant. The public release exposes the main VenomRec/DCIP-IEOS setting only.",
     )
 
     return parser.parse_args(argv)
