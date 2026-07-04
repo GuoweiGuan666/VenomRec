@@ -1,8 +1,12 @@
-# VenomRec
+# VenomRec: Cross-Modal Interactive Poisoning for Targeted Promotion in Multimodal LLM Recommender Systems
+
 
 This repository contains the minimal VIP5/T5-small code path used for the VenomRec experiments. It keeps only the source code needed to generate poisoned data, fine-tune VIP5, evaluate recommendation metrics with ER, and evaluate text stealthiness with ROUGE.
-
+<p align="center">
+  <img src="venomrec_overview.PNG" width="850">
+</p>
 The repository intentionally does not include datasets, extracted image features, checkpoints, logs, caches, notebooks, or generated poisoned artifacts.
+
 
 ## Code Layout
 
